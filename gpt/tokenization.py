@@ -7,8 +7,6 @@ from sentencepiece import SentencePieceProcessor, SentencePieceTrainer
 
 
 class Tokenizer:
-    """Tokenizer for LLaMA."""
-
     def __init__(self, model_path: Path) -> None:
         self.processor = SentencePieceProcessor(model_file=str(model_path))
         self.bos_id = self.processor.bos_id()
@@ -21,24 +19,13 @@ class Tokenizer:
 
     def encode(
         self,
-        string: str,
-        bos: bool = True,
-        eos: bool = False,
-        max_length: int = -1,
-        pad: bool = False,
-        device: Optional[torch.device] = None
+        string: str
     ) -> torch.Tensor:
         tokens = self.processor.encode(string)
-        if bos:
-            tokens = [self.bos_id] + tokens
-        if eos:
-            tokens = tokens + [self.eos_id]
-        if max_length > 0:
-            tokens = tokens[:max_length]
-        if pad and len(tokens) < max_length:
-            tokens += [self.pad_id] * (max_length - len(tokens))
 
-        return torch.tensor(tokens, dtype=torch.int, device=device)
+        tokens = [self.bos_id] +  tokens + [self.eos_id]
+ 
+        return torch.tensor(tokens, dtype=torch.int)
 
     def decode(self, tokens: torch.Tensor) -> str:
         return self.processor.decode(tokens.tolist())

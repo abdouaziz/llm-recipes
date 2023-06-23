@@ -16,15 +16,14 @@ class Tokenizer:
     @property
     def vocab_size(self) -> int:
         return self.processor.vocab_size()
+    
+    
 
-    def encode(
-        self,
-        string: str
-    ) -> torch.Tensor:
+    def encode(self, string: str) -> torch.Tensor:
         tokens = self.processor.encode(string)
 
-        tokens = [self.bos_id] +  tokens + [self.eos_id]
- 
+        tokens = [self.bos_id] + tokens + [self.eos_id]
+
         return torch.tensor(tokens, dtype=torch.int)
 
     def decode(self, tokens: torch.Tensor) -> str:
@@ -33,4 +32,6 @@ class Tokenizer:
     @staticmethod
     def train(input: str, destination: str, vocab_size=32000) -> None:
         model_prefix = os.path.join(destination, "tokenizer")
-        SentencePieceTrainer.Train(input=input, model_prefix=model_prefix, vocab_size=vocab_size)
+        SentencePieceTrainer.Train(
+            input=input, model_prefix=model_prefix, vocab_size=vocab_size
+        )

@@ -8,7 +8,7 @@ from typing import Tuple, Optional
 
 import math
 
-from gpt.utils import compute_mask_indices
+from utils import compute_mask_indices
 from dataclasses import dataclass
 
 

@@ -24,7 +24,6 @@ class Config:
         self.batch_size = 32
         self.epochs = 10
         self.learning_rate = 0.001
-        self.num_classes = 10
         self.num_workers = 4
         self.output_dim = 35
         self.seed = 1
@@ -250,21 +249,18 @@ class Decoder(nn.Module):
 
 
 class GPT(nn.Module):
-    def __init__(
-        self,
-        vocab_size: int,
-        model_dim: int,
-        num_layers: int,
-        num_heads: int,
-        ff_dim: int,
-        dropout: float,
-        n_classes: int,
-    ) -> None:
+    def __init__(self,config=Config() , n_classes=10) :
         super(GPT, self).__init__()
 
-        self.decoder = Decoder(model_dim, num_layers, num_heads, ff_dim, dropout)
-        self.generation = nn.Linear(model_dim, vocab_size)
-        self.classification = nn.Linear(model_dim, n_classes)
+        self.decoder = Decoder(model_dim=config.model_dim,
+                               num_layers=config.num_layers,
+                               num_heads=config.num_heads,
+                               ff_dim=config.ff_dim,
+                               dropout=config.dropout)
+        
+        self.generation = nn.Linear(config.model_dim, config.vocab_size)
+
+        self.classification = nn.Linear(config.model_dim, n_classes)
 
     def forward(self, input):
         output = self.decoder(input)
@@ -275,21 +271,23 @@ class GPT(nn.Module):
         return logits, prediction
 
 
+
+
+     
 if __name__ == "__main__":
+
+    config = Config()
+
+    print(config , "\n")
 
     x = torch.rand(4, 512, 512)
 
     multihead = GPT(
-        vocab_size=3020,
-        model_dim=512,
-        num_layers=6,
-        num_heads=8,
-        ff_dim=2048,
-        dropout=0.1,
-        n_classes=4,
+        config=config,
+        n_classes=10
     )
 
     logits, prediction = multihead(x)
 
     print("logits shape ", logits.shape)
-    print("class prediction shape ", prediction.shape)
+    print("class prediction shape ", prediction)

@@ -35,3 +35,8 @@ class Tokenizer:
         SentencePieceTrainer.Train(
             input=input, model_prefix=model_prefix, vocab_size=vocab_size
         )
+
+
+
+if __name__=="__main__":
+    pass

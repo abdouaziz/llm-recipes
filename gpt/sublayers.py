@@ -11,30 +11,8 @@ import math
 from utils import compute_mask_indices
 from dataclasses import dataclass
 
-
-@dataclass
-class Config:
-    def __init__(self):
-        self.vocab_size = 3020
-        self.model_dim = 512
-        self.num_heads = 8
-        self.num_layers = 6
-        self.ff_dim = 2048
-        self.dropout = 0.1
-        self.batch_size = 32
-        self.epochs = 10
-        self.learning_rate = 0.001
-        self.num_workers = 4
-        self.output_dim = 35
-        self.seed = 1
-        self.log_interval = 10
-        self.save_model = True
-        self.save_model_path = "model.pt"
-        self.cuda = torch.cuda.is_available()
-        self.device = torch.device("cuda" if self.cuda else "cpu")
-
-    def __str__(self):
-        return str(self.__dict__)
+from typing import Tuple, Optional , NamedTuple
+from config import GPTConfig
 
 
 class ScaledDotProductAttention(nn.Module):
@@ -246,10 +224,15 @@ class Decoder(nn.Module):
         for i in range(self.num_layers):
             out = self.layers[i](out, mask)
         return out
+    
+
+class GPTOutput(NamedTuple):
+    logits: Tensor
+    prediction: Tensor
 
 
 class GPT(nn.Module):
-    def __init__(self,config=Config() , n_classes=10) :
+    def __init__(self,config=GPTConfig() , n_classes=10) :
         super(GPT, self).__init__()
 
         self.decoder = Decoder(model_dim=config.model_dim,
@@ -268,7 +251,11 @@ class GPT(nn.Module):
         logits = self.generation(output)
         prediction = self.classification(output)
 
-        return logits, prediction
+        return GPTOutput(
+            logits=logits,
+            prediction=prediction
+        )
+    
 
 
 
@@ -276,18 +263,15 @@ class GPT(nn.Module):
      
 if __name__ == "__main__":
 
-    config = Config()
-
-    print(config , "\n")
+    config = GPTConfig()
 
     x = torch.rand(4, 512, 512)
 
-    multihead = GPT(
+    gpt = GPT(
         config=config,
         n_classes=10
     )
 
-    logits, prediction = multihead(x)
-
-    print("logits shape ", logits.shape)
-    print("class prediction shape ", prediction)
+    output  = gpt(x)
+    
+    print(output )
